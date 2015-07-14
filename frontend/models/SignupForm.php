@@ -10,6 +10,8 @@ use Yii;
  */
 class SignupForm extends Model
 {
+    public $first_name;
+    public $last_name;
     public $username;
     public $email;
     public $password;
@@ -20,6 +22,8 @@ class SignupForm extends Model
     public function rules()
     {
         return [
+            ['first_name', 'required', 'message' => 'Kolom ini wajib diisi!'],
+            ['last_name', 'required'],
             ['username', 'filter', 'filter' => 'trim'],
             ['username', 'required'],
             ['username', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This username has already been taken.'],
@@ -44,6 +48,8 @@ class SignupForm extends Model
     {
         if ($this->validate()) {
             $user = new User();
+            $user->first_name = $this->first_name;
+            $user->last_name = $this->last_name;
             $user->username = $this->username;
             $user->email = $this->email;
             $user->setPassword($this->password);
