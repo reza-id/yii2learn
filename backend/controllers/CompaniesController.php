@@ -62,8 +62,10 @@ class CompaniesController extends Controller
     {
         $model = new Companies();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->company_id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $model->company_created_date = date('Y-m-d h:i:s');
+            if ($model->save())
+                return $this->redirect(['view', 'id' => $model->company_id]);
         } else {
             return $this->render('create', [
                 'model' => $model,
