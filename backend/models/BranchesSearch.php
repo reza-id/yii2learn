@@ -18,8 +18,8 @@ class BranchesSearch extends Branches
     public function rules()
     {
         return [
-            [['branch_id', 'companies_company_id'], 'integer'],
-            [['branch_name', 'branch_address', 'branch_created_date', 'branch_status'], 'safe'],
+            [['branch_id'], 'integer'],
+            [['branch_name', 'companies_company_id', 'branch_address', 'branch_created_date', 'branch_status'], 'safe'],
         ];
     }
 
@@ -55,14 +55,16 @@ class BranchesSearch extends Branches
             return $dataProvider;
         }
 
+        $query->joinWith('companiesCompany');
+
         $query->andFilterWhere([
             'branch_id' => $this->branch_id,
-            'companies_company_id' => $this->companies_company_id,
             'branch_created_date' => $this->branch_created_date,
         ]);
 
         $query->andFilterWhere(['like', 'branch_name', $this->branch_name])
             ->andFilterWhere(['like', 'branch_address', $this->branch_address])
+            ->andFilterWhere(['like', 'companies.company_name', $this->companies_company_id])
             ->andFilterWhere(['like', 'branch_status', $this->branch_status]);
 
         return $dataProvider;
