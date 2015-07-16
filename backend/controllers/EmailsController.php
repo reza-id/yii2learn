@@ -7,6 +7,7 @@ use backend\models\Emails;
 use backend\models\EmailsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\UploadedFile;
 use yii\filters\VerbFilter;
 
 /**
@@ -62,7 +63,34 @@ class EmailsController extends Controller
     {
         $model = new Emails();
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+            
+            // upload the attachment
+            $model->attachment = UploadedFile::getInstance($model, 'attachment');
+
+            if ($model->attachment) {
+                $time = time();
+                $model->attachment->saveAs('attachments/'.$time.'.'.$model->attachment->extension);
+                $model->attachment='attachments/'.$time.'.'.$model->attachment->extension;
+            }
+            if ($model->attachment) {
+                $value = Yii::$app->mailer->compose()
+                    ->setFrom(['email@example.com'=>'Nama Pengirim'])
+                    ->setTo($model->receiver_emal)
+                    ->setSubject($model->subject)
+                    ->setHtmlBody($model->content)
+                    ->attach($model->attachment)
+                    ->send();
+            } else {
+                $value = Yii::$app->mailer->compose()
+                    ->setFrom(['email@example.com'=>'Nama Pengirim'])
+                    ->setTo($model->receiver_emal)
+                    ->setSubject($model->subject)
+                    ->setHtmlBody($model->content)
+                    ->send();
+            }
+
+            $model->save();
             return $this->redirect(['view', 'id' => $model->id]);
         } else {
             return $this->render('create', [
