@@ -8,6 +8,7 @@ use backend\models\LocationsSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
+use yii\helpers\Json;
 
 /**
  * LocationsController implements the CRUD actions for Locations model.
@@ -101,6 +102,12 @@ class LocationsController extends Controller
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
+    }
+
+    public function actionGetCityProvince($zipId)
+    {
+        $location = Locations::findOne($zipId);
+        echo Json::encode($location);
     }
 
     /**
