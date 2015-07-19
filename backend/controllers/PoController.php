@@ -5,6 +5,8 @@ namespace backend\controllers;
 use Yii;
 use backend\models\Po;
 use backend\models\PoSearch;
+use backend\models\PoItem;
+use backend\models\Model;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -61,12 +63,40 @@ class PoController extends Controller
     public function actionCreate()
     {
         $model = new Po();
+        $modelsPoItem = [new PoItem];
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $modelsPoItem = Model::createMultiple(PoItem::classname());
+            Model::loadMultiple($modelsPoItem, Yii::$app->request->post());
+
+            // validate all models
+            $valid = $model->validate();
+            $valid = Model::validateMultiple($modelsPoItem) && $valid;
+
+            if ($valid) {
+                $transaction = \Yii::$app->db->beginTransaction();
+                try {
+                    if ($flag = $model->save(false)) {
+                        foreach ($modelsPoItem as $modelPoItem) {
+                            $modelPoItem->po_id = $model->id;
+                            if (! ($flag = $modelPoItem->save(false))) {
+                                $transaction->rollBack();
+                                break;
+                            }
+                        }
+                    }
+                    if ($flag) {
+                        $transaction->commit();
+                        return $this->redirect(['view', 'id' => $model->id]);
+                    }
+                } catch (Exception $e) {
+                    $transaction->rollBack();
+                }
+            }
         } else {
             return $this->render('create', [
                 'model' => $model,
+                'modelsPoItem' => (empty($modelsPoItem)) ? [new PoItem] : $modelsPoItem,
             ]);
         }
     }
