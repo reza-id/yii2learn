@@ -32,7 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
         Modal::end();
     ?>
 
-    <?php Pjax::begin(); ?>
+    <?php Pjax::begin(['id'=>'branches-grid']); ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
         'filterModel' => $searchModel,

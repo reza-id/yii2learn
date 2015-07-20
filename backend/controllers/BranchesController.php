@@ -65,7 +65,9 @@ class BranchesController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             $model->branch_created_date = date('Y-m-d h:i:s');
             if ($model->save())
-                return $this->redirect(['view', 'id' => $model->branch_id]);
+                echo 1;
+            else
+                echo 0;
         } else {
             return $this->renderAjax('create', [
                 'model' => $model,
